@@ -1,0 +1,17 @@
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.rc('xtick', labelsize=15)
+matplotlib.rc('ytick', labelsize=15)
+import numpy as np
+import os
+import sys
+import glob
+cwd = os.getcwd()
+
+datafolder = '/Users/romain/work/Auger/EASIER/LPSC/analysis/txtdata/results/rms/'
+datadistE7 = glob.glob(datafolder + 'easier7*')
+datadistE47 = glob.glob(datafolder + 'easier47*')
+datadistGD = glob.glob(datafolder + 'gigaduck*')
+simfolder
+simdist 
+for 
