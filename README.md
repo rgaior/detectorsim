@@ -17,6 +17,8 @@ ex:
 python simwf gi 2   (runs thes simulation for the GI antenna with the method 2 )   
 python simsignalwithtxt.py ../data/testenvelope.txt   (runs thes simulation for the norsat antenna with the method 3 and power envelope defined in ../data/testenvelope.txt)
 
+## usage
+to use the code, you need to change the paths that are in /utils/constant.py
 
 
 
