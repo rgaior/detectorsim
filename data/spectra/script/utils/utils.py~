@@ -1,0 +1,13 @@
+import numpy as np
+
+def readspectrum(filename):
+    f = open(filename,'r')
+    lines = f.readlines()
+    nrpoint = 0
+    for l in lines:
+        if 'UI_DATA_POINTS' in l:
+            nrpoint = int(l.split('=').[1])
+            print nrpoint
+#        if '# Begin TRACE A Data'
+
+            

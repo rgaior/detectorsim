@@ -1,0 +1,54 @@
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.rc('xtick', labelsize=15)
+matplotlib.rc('ytick', labelsize=15)
+import numpy as np
+import os
+import sys
+cwd = os.getcwd()
+classpath = cwd + '/../classes/'
+utilspath = cwd + '/../utils/'
+sys.path.append(utilspath)
+sys.path.append(classpath)
+import utils
+import simulation
+import detector
+import waveform
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("method", type=int, nargs='?', default=3, help="power detection simulation  method: 1,2 or 3")
+args = parser.parse_args()
+
+print '#####################################'
+print '###### power det method: ', args.method ,' ######'
+print '#####################################'
+method = args.method
+
+iter = 100
+#for met in [1,2,3]:
+for dt in ['gi','dmx','norsat']:
+    det = detector.Detector(type=dt)
+    det.loadspectrum()
+    dist = np.array([])
+    for i in range(iter):
+        sim = simulation.Simulation(det=det,sampling=5e9)
+        sim.producetime()
+        sim.producenoise(True)
+        simwf = waveform.Waveform(sim.time,sim.noise, type='hf')
+        wf = det.producesimwaveform(simwf,'adc',method)
+        watttrace = utils.linearize(wf.amp)
+        normtrace = utils.normalize(watttrace)
+        dist = np.append(dist,normtrace)
+#wf = det.producesimwaveform(simwf,'powerdetector',method)
+#    plt.plot(wf.time, wf.amp)
+        
+
+#print 'rms = ',  np.std(wf.amp)
+
+#plt.plot(wf.time, normtrace)
+    bins = np.linspace(-5,10,100)
+#    plt.hist(dist,bins=bins,log=True,label='method:' + str(met))
+    plt.hist(dist,bins=bins,lw=2,histtype='step',log=True,label=dt)
+plt.legend()
+plt.show()

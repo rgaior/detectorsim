@@ -17,7 +17,7 @@ import detector
 #temp, gain, bw, tau of power det
 tsys = 50
 gain = 1e6
-f1 = 1e6
+f1 = 0
 #f1 = 0.95e9
 #f2 = 1.75e9
 f2 = 2e9
@@ -85,7 +85,17 @@ ax3.text(0.95, 0.85, 'std = '+  str("%.2g" % stdpnoise),
         transform=ax3.transAxes,
         color='black', fontsize=12)
 
+fft = np.fft.rfft(sim.noise)
+freq = np.fft.rfftfreq(len(sim.noise), sim.time[1] - sim.time[0])
 
+fig2 = plt.figure(figsize=(8,8))
+ax21 = plt.subplot(211)
+ax21.plot(freq/1e6,np.absolute(fft))
+ax21.set_ylabel('spectrum [a.u.]')
+ax22 = plt.subplot(212, sharex=ax21)
+ax22.plot(freq/1e6,np.angle(fft))
+ax22.set_ylabel('phase [radian]')
+ax22.set_xlabel('frequency [MHz]')
 #stdvnoise = np.std(sim.noise)
 # plt.xlabel('power at installation [dBm]', fontsize =15)
 # plt.ylabel('entries',fontsize = 15)

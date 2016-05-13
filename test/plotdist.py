@@ -1,81 +1,42 @@
+###############################################
+###script to plot the residual distribution ###
+###############################################
+
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.rc('xtick', labelsize=15)
 matplotlib.rc('ytick', labelsize=15)
+from matplotlib import gridspec
 import numpy as np
 import os
 import sys
-import glob
 cwd = os.getcwd()
+utilspath = cwd + '/../utils/'
+sys.path.append(utilspath)
+import utils
+import constant
 
-datafolder = '/Users/romain/work/Auger/EASIER/LPSC/analysis/txtdata/results/rms/'
-datadistE7 = glob.glob(datafolder + 'easier7*')
-datadistE47 = glob.glob(datafolder + 'easier61*')
-datadistGD = glob.glob(datafolder + 'gigaduck*')
+method = int(sys.argv[1])
+resultfolder = constant.resultfolder 
+'/residuals/nocapa/distnocapa'+str(method)+'.npz'
+nocapa = np.load(resultfolder + '/residuals/nocapa/distnocapa_'+str(method)+'.npz')
+capa = np.load(resultfolder + '/residuals/capa/distcapa_'+str(method)+'.npz')
 
-simfolder = '/Users/romain/work/Auger/EASIER/LPSC/detectorsim/results/rms/'
-simdistE7 =  simfolder + 'disteasier7.npz'
-simdistE47 =  simfolder + 'disteasier47.npz'
-simdistGD =  simfolder + 'distgiga.npz'
-fig1 = plt.figure()
-fig1.suptitle('EASIER7',fontsize=15,fontweight='bold')
+bins = np.linspace(-0.2,0.2,100)
+fig = plt.figure()
+fig.suptitle('method: ' + str(method), fontsize=15, fontweight='bold')
 ax = plt.subplot(111)
-bins1= np.linspace(-200,200,401)
-c=0
-for f in datadistE7:
-    data = np.load(f)['arr_0']
-    if len(data>0):
-        if c==0:
-            ax.hist(data,bins=bins1,histtype='step',color='black',alpha=0.2,normed=True,log=True,label='data')
-            c+=1
-        else:
-            ax.hist(data,bins=bins1,histtype='step',color='black',alpha=0.2,normed=True,log=True)
-
-simE7  = np.load(simdistE7)['arr_0']
-simE7 = simE7 - np.mean(simE7)
-ax.hist(simE7,bins=bins1,histtype='step',color='red',lw=2,normed=True,log=True,label='sim.')
-ax.set_xlabel('amplitude - mean [ADC]')
-plt.legend()
-
-
-fig2 = plt.figure()
-fig2.suptitle('EASIER61',fontsize=15,fontweight='bold')
-ax2 = plt.subplot(111)
-bins2= np.linspace(-300,300,601)
-c2 = 0 
-for f in datadistE47:
-    data = np.load(f)['arr_0']
-#    print data
-    if len(data>0):
-        if c2 == 0:
-            ax2.hist(data,bins=bins2,histtype='step',color='black',alpha=0.2,normed=True,log=True,label='data')
-            c2+=1
-        else:
-            ax2.hist(data,bins=bins2,histtype='step',color='black',alpha=0.2,normed=True,log=True)
-simE47  = np.load(simdistE47)['arr_0']
-simE47 = simE47 - np.mean(simE47)
-ax2.hist(simE47,bins=bins2,histtype='step',lw=2,color='r',normed=True,log=True,label='sim.')
-ax2.set_xlabel('amplitude - mean [ADC]')
-plt.legend()
-
-fig3 = plt.figure()
-fig3.suptitle('Gigaduck',fontsize=15,fontweight='bold')
-ax3 = plt.subplot(111)
-bins2= np.linspace(-300,300,601)
-c3= 0
-for f in datadistGD:
-    data = np.load(f)['arr_0']
-#    print data
-    if len(data>0):
-        if c3==0:
-            ax3.hist(data,bins=bins2,histtype='step',color='black',alpha=0.2,normed=True,log=True,label='data')
-            c3+=1
-        else:
-            ax3.hist(data,bins=bins2,histtype='step',color='black',alpha=0.2,normed=True,log=True)
-simGD  = np.load(simdistGD)['arr_0']
-simGD = simGD - np.mean(simGD)
-ax3.set_xlabel('amplitude - mean [ADC]')
-ax3.hist(simGD[::-1],bins=bins2,histtype='step',color='red',lw=2,normed=True,log=True,label='sim')
+ax.hist(nocapa['arr_0'],bins=bins,histtype='step',lw=2,log=True,label='no capacitor')
+ax.hist(capa['arr_0'],bins=bins,histtype='step',lw=2,log=True,label='with capacitor')
+ax.set_xlabel('V_sim - V_meas [V]')
+ax.text(0.01, 0.95, 'std = ' + str("%.3f" % np.std(nocapa['arr_0']) + ' V'),
+        verticalalignment='top', horizontalalignment='left',
+        transform=ax.transAxes,
+        color='blue', fontsize=15)
+ax.text(0.01, 0.85, 'std = ' + str("%.3f" % np.std(capa['arr_0']) + ' V'),
+        verticalalignment='top', horizontalalignment='left',
+        transform=ax.transAxes,
+        color='green', fontsize=15)
 plt.legend()
 
 

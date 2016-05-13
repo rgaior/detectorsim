@@ -47,7 +47,9 @@ class Simulation:
             self.noise = self.producenoisewf()
         elif realistic == True:
             self.noise = self.producenoisewfreal()
+
     def producenoisewf(self):
+        self.det.setpnoise()
         #first produce the right spectrum:
         # we produce an fft with a flat spectrum and random phase:
         nyfreq = 0.5*self.sampling
@@ -58,16 +60,13 @@ class Simulation:
         size = len(freq[(freq > self.det.f1) & (freq < self.det.f2)])
         spec[(freq > self.det.f1) & (freq < self.det.f2)] = np.ones(size)
         phase[(freq > self.det.f1) & (freq < self.det.f2)] = np.random.uniform(-math.pi, math.pi, size)
-#        fft = spec
-#        fft = spec*np.exp(1j*np.pi)
         fft = spec*np.exp(1j*phase)
         #norm fft:
         sumsquare = np.sum(np.absolute(fft)**2)
         fft = fft/np.sqrt(sumsquare)
-        Pnoise = constant.kb*self.det.temp*(self.det.f2 - self.det.f1)
+        Pnoise = self.det.pnoise
         fft = fft*np.sqrt(2*len(freq)*len(freq)*Pnoise*50)
         timewf = np.fft.irfft(fft)
-        #        print len(freq)
         return timewf
 
     def producenoisewfreal(self):
@@ -90,20 +89,17 @@ class Simulation:
         #norm fft:
         sumsquare = np.sum(np.absolute(fft)**2)
         fft = fft/np.sqrt(sumsquare)
-        deltaB = np.absolute(np.trapz(insidespec,insidefreq))
-        Pnoise = constant.kb*self.det.temp*deltaB
-#        Pnoise = constant.kb*self.det.temp*(self.det.f2 - self.det.f1)
+        Pnoise = self.det.pnoise
+        #        Pnoise = constant.kb*self.det.temp*(self.det.f2 - self.det.f1)
         fft = fft*np.sqrt(2*len(freq)*len(freq)*Pnoise*50)
         timewf = np.fft.irfft(fft)
-        #        print len(freq)
         return timewf
 
     # in case we want a simple fake signal
     # a gaussian is implemented as example
     def setpowerenvelope(self, type):
         if type == 'gauss':
-            Pnoise = constant.kb*self.det.temp*(self.det.f2 - self.det.f1)
-            Psig = self.snr*Pnoise
+            Psig = self.snr*self.det.pnoise
             powerenvelope =  Psig*utils.func_normedgauss(self.time,self.sigtime,self.siglength)
         self.powerenvelope = powerenvelope
 
@@ -127,7 +123,10 @@ class Simulation:
 
     #produce the signal in time vs amplitude [V]
     def producesignal(self):
-        #        signal = utils.wf_normal(0,1,len(self.time))
-        noisewf = self.producenoisewf()
+        #        signal = utils.wf_normal(0,1,len(self.time)
+        if self.det.type=='':
+            noisewf = self.producenoisewf()
+        else:
+            noisewf = self.producenoisewfreal()
         noisewf = noisewf/(np.sqrt(np.mean(noisewf**2)))
         self.signal = np.sqrt(self.powerenvelope*constant.impedance)*noisewf
